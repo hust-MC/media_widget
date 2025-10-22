@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@android:color/white"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Desktop Media Controller"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Connect Button -->
+    <Button
+        android:id="@+id/connect_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to MediaSession"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Album Art -->
+    <ImageView
+        android:id="@+id/desktop_album_art"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@android:drawable/ic_media_play"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Song Title -->
+    <TextView
+        android:id="@+id/desktop_song_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No Media"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Song Artist -->
+    <TextView
+        android:id="@+id/desktop_song_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not Connected"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Control Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <ImageButton
+            android:id="@+id/desktop_prev_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_skip_previous"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="16dp"
+            android:alpha="0.5" />
+
+        <ImageButton
+            android:id="@+id/desktop_play_pause_button"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/ic_play_arrow"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="16dp"
+            android:alpha="0.5" />
+
+        <ImageButton
+            android:id="@+id/desktop_next_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_skip_next"
+            android:background="@android:color/transparent"
+            android:alpha="0.5" />
+
+    </LinearLayout>
+
+    <!-- Status Text -->
+    <TextView
+        android:id="@+id/desktop_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MediaSession Demo - Desktop Controller"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp" />
+
+</LinearLayout>
