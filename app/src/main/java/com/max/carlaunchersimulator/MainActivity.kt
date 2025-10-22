@@ -63,17 +63,8 @@ class MainActivity : AppCompatActivity() {
         // 开始定期检查连接
         handler.post(checkConnectionRunnable)
 
-        // Set click listeners
+        // Set click listeners - 只有播放按钮有点击事件
         playPauseButton.setOnClickListener {
-            if (mediaSessionHelper.isPlaying()) {
-                mediaSessionHelper.pause()
-            } else {
-                mediaSessionHelper.play()
-            }
-        }
-        
-        // 点击整个音乐控件区域启动音乐播放App（仅在未连接时）
-        findViewById<LinearLayout>(R.id.music_player_widget).setOnClickListener {
             if (mediaSessionHelper.isConnected()) {
                 // 如果已连接，直接播放/暂停
                 if (mediaSessionHelper.isPlaying()) {
@@ -93,13 +84,27 @@ class MainActivity : AppCompatActivity() {
         songTitle.text = currentSong.title
         songArtist.text = currentSong.artist
 
-        // Update play/pause button icon
+        // Update album art from MediaSession
+        updateAlbumArt()
+
+        // Update play/pause button icon (white color)
         playPauseButton.setImageResource(
-            if (mediaSessionHelper.isPlaying()) R.drawable.ic_pause else R.drawable.ic_play_arrow
+            if (mediaSessionHelper.isPlaying()) R.drawable.ic_pause_two_bars else R.drawable.ic_play_arrow
         )
+        playPauseButton.setColorFilter(android.graphics.Color.WHITE)
 
         // Update status
         statusText.text = if (mediaSessionHelper.isPlaying()) "正在播放 - MediaSession" else "已暂停"
+    }
+    
+    private fun updateAlbumArt() {
+        val albumArtBitmap = mediaSessionHelper.getAlbumArt()
+        if (albumArtBitmap != null) {
+            albumArt.setImageBitmap(albumArtBitmap)
+        } else {
+            // 使用默认图标
+            albumArt.setImageResource(android.R.drawable.ic_media_play)
+        }
     }
 
     override fun onResume() {

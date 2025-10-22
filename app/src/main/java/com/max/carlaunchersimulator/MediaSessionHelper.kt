@@ -23,7 +23,7 @@ class MediaSessionHelper(private val context: Context) {
     private var isPlaying = false
     private var currentSong: Song? = null
 
-    data class Song(val title: String, val artist: String, val uri: String)
+    data class Song(val title: String, val artist: String, val uri: String, val albumArt: android.graphics.Bitmap? = null)
 
     fun initialize() {
         try {
@@ -92,7 +92,8 @@ class MediaSessionHelper(private val context: Context) {
             if (metadata != null) {
                 val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "未知歌曲"
                 val artist = metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "未知艺术家"
-                currentSong = Song(title, artist, "")
+                val albumArt = metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
+                currentSong = Song(title, artist, "", albumArt)
             }
         }
     }
@@ -129,7 +130,9 @@ class MediaSessionHelper(private val context: Context) {
         mediaController?.transportControls?.stop()
     }
 
-    fun getCurrentSong(): Song = currentSong ?: Song("无歌曲", "无艺术家", "")
+    fun getCurrentSong(): Song = currentSong ?: Song("无歌曲", "无艺术家", "", null)
+    
+    fun getAlbumArt(): android.graphics.Bitmap? = currentSong?.albumArt
 
     fun isPlaying(): Boolean = isPlaying
 

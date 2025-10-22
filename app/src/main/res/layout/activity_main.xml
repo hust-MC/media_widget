@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#1A1A1A"
     android:padding="16dp">
 
@@ -19,10 +18,10 @@
     <!-- 主要内容区域 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_marginTop="60dp">
 
         <!-- 模拟车机桌面内容 -->
         <TextView
@@ -36,7 +35,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="• 实况桌面 • 地图桌面 • 壁纸桌面"
+            android:text="实况桌面 • 地图桌面 • 壁纸桌面"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
@@ -44,32 +43,33 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="• 后视镜调节 • 氛围灯 • 按摩功能"
+            android:text="天气显示 • 氛围灯 • 空调调节"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
 
     </LinearLayout>
 
-    <!-- 底部音乐播放器控件 (模拟车机左下角) -->
+    <!-- 左下角音乐播放器控件 -->
     <LinearLayout
         android:id="@+id/music_player_widget"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#2A2A2A"
-        android:padding="12dp"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:background="@drawable/music_player_background"
+        android:padding="8dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="0dp">
 
-        <!-- 专辑封面 -->
+        <!-- 专辑封面 (替换播放三角形) -->
         <ImageView
             android:id="@+id/album_art"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@android:drawable/ic_media_play"
             android:scaleType="centerCrop"
-            android:background="#333333"
+            android:background="@drawable/album_art_placeholder"
             android:layout_gravity="center_vertical" />
 
         <!-- 歌曲信息 -->
@@ -78,17 +78,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="12dp"
-            android:layout_gravity="center_vertical">
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp">
 
             <!-- 歌曲标题 -->
             <TextView
                 android:id="@+id/song_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="若梦"
                 android:textColor="@android:color/white"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -96,26 +97,27 @@
             <!-- 歌手 -->
             <TextView
                 android:id="@+id/song_artist"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="周深"
                 android:textColor="#CCCCCC"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp"
+                android:textSize="12sp"
+                android:layout_marginTop="1dp"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
         </LinearLayout>
 
-        <!-- 播放控制按钮 -->
+        <!-- 播放控制按钮 (放大，白色) -->
         <ImageButton
             android:id="@+id/play_pause_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:src="@drawable/ic_play_arrow"
-            android:background="@android:color/transparent"
+            android:background="@drawable/play_button_background"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp" />
+            android:scaleType="centerInside"
+            android:padding="12dp" />
 
     </LinearLayout>
 
@@ -127,6 +129,9 @@
         android:text="MediaSession Demo - 车机音乐播放器"
         android:textColor="#888888"
         android:textSize="12sp"
-        android:layout_marginTop="8dp" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="0dp" />
 
-</LinearLayout>
+</RelativeLayout>
