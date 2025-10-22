@@ -10,6 +10,7 @@
         <intent>
             <action android:name="android.media.browse.MediaBrowserService" />
         </intent>
+        <package android:name="com.max.media_center" />
     </queries>
 
     <!-- Required for MediaSession management -->
@@ -32,16 +33,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".DesktopControllerActivity"
-            android:exported="true"
-            android:label="Desktop Media Controller">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

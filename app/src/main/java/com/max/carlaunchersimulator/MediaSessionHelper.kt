@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.net.Uri
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -18,43 +19,65 @@ class MediaSessionHelper(private val context: Context) {
     private var mediaSessionManager: MediaSessionManager? = null
     private var mediaController: MediaControllerCompat? = null
     private var mediaControllerCallback: MediaControllerCallback? = null
+    private var mediaBrowser: MediaBrowserCompat? = null
     private var isPlaying = false
     private var currentSong: Song? = null
 
     data class Song(val title: String, val artist: String, val uri: String)
 
     fun initialize() {
-        // 初始化MediaSessionManager
-        mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        
-        // 尝试连接到音乐播放App的MediaSession
-        connectToMusicApp()
+        try {
+            println("🔧 初始化MediaSessionManager...")
+            // 初始化MediaSessionManager
+            mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+            println("✅ MediaSessionManager初始化成功")
+            
+            // 尝试连接到音乐播放App的MediaSession
+            connectToMusicApp()
+        } catch (e: Exception) {
+            println("❌ MediaSessionManager初始化失败: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     private fun connectToMusicApp() {
         try {
-            // 获取活跃的媒体会话
-            val activeSessions = mediaSessionManager?.getActiveSessions(
-                ComponentName(context, MainActivity::class.java)
-            )
-
-            if (!activeSessions.isNullOrEmpty()) {
-                // 连接到第一个活跃的媒体会话（通常是音乐播放App）
-                val sessionController = activeSessions[0]
-                val sessionToken = sessionController.sessionToken
-                // 将 MediaSession.Token 转换为 MediaSessionCompat.Token
-                val compatToken = MediaSessionCompat.Token.fromToken(sessionToken)
-                mediaController = MediaControllerCompat(context, compatToken)
-
-                // 设置回调以监听媒体信息变化
-                setupMediaControllerCallback()
-
-                // 更新当前歌曲信息
-                updateCurrentSong()
-            }
+            println("🔍 尝试使用MediaBrowser连接音乐App...")
+            
+            // 使用MediaBrowser连接音乐App
+            val serviceComponent = ComponentName("com.max.media_center", "com.max.media_center.MediaService")
+            mediaBrowser = MediaBrowserCompat(context, serviceComponent, connectionCallback, null)
+            mediaBrowser?.connect()
+            
         } catch (e: SecurityException) {
-            // 权限不足，无法访问其他App的MediaSession
+            println("❌ 权限不足: ${e.message}")
             e.printStackTrace()
+        } catch (e: Exception) {
+            println("❌ 连接失败: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    private val connectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
+        override fun onConnected() {
+            println("✅ MediaBrowser连接成功！")
+            
+            // 获取MediaSession Token
+            val sessionToken = mediaBrowser?.sessionToken
+            if (sessionToken != null) {
+                mediaController = MediaControllerCompat(context, sessionToken)
+                setupMediaControllerCallback()
+                updateCurrentSong()
+                println("✅ MediaController设置成功！")
+            }
+        }
+        
+        override fun onConnectionFailed() {
+            println("❌ MediaBrowser连接失败")
+        }
+        
+        override fun onConnectionSuspended() {
+            println("⚠️ MediaBrowser连接暂停")
         }
     }
 
@@ -122,5 +145,7 @@ class MediaSessionHelper(private val context: Context) {
         mediaController?.unregisterCallback(mediaControllerCallback!!)
         mediaController = null
         mediaControllerCallback = null
+        mediaBrowser?.disconnect()
+        mediaBrowser = null
     }
 }
