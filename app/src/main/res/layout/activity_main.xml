@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1A1A1A"
@@ -7,21 +8,29 @@
 
     <!-- 车机桌面模拟 -->
     <TextView
+        android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="车机桌面 - MediaSession演示"
         android:textColor="@android:color/white"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 主要内容区域 -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/main_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginTop="60dp">
+        android:layout_marginTop="60dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/music_player_widget">
 
         <!-- 模拟车机桌面内容 -->
         <TextView
@@ -57,10 +66,10 @@
         android:orientation="horizontal"
         android:background="@drawable/music_player_background"
         android:padding="8dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
         android:layout_marginBottom="16dp"
-        android:layout_marginStart="0dp">
+        android:layout_marginStart="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <!-- 专辑封面 (替换播放三角形) -->
         <ImageView
@@ -117,6 +126,7 @@
             android:background="@drawable/play_button_background"
             android:layout_gravity="center_vertical"
             android:scaleType="centerInside"
+            android:contentDescription="播放"
             android:padding="12dp" />
 
     </LinearLayout>
@@ -129,9 +139,9 @@
         android:text="MediaSession Demo - 车机音乐播放器"
         android:textColor="#888888"
         android:textSize="12sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="0dp" />
+        android:layout_marginEnd="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
