@@ -6,9 +6,6 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.Bundle
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Button
 import android.widget.ImageButton
@@ -116,8 +113,9 @@ class DesktopControllerActivity : AppCompatActivity() {
     }
 
     private fun setupMediaControllerCallback() {
-        mediaControllerCallback = MediaControllerCallback()
-        mediaController?.registerCallback(mediaControllerCallback!!)
+        val callback = MediaControllerCallback()
+        mediaControllerCallback = callback
+        mediaController?.registerCallback(callback)
     }
 
     private fun updateMediaInfo() {
@@ -167,7 +165,7 @@ class DesktopControllerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaController?.unregisterCallback(mediaControllerCallback!!)
+        mediaControllerCallback?.let { mediaController?.unregisterCallback(it) }
         mediaController = null
     }
 }

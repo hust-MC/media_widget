@@ -1,18 +1,16 @@
 package com.max.carlaunchersimulator
 
 import androidx.appcompat.app.AppCompatActivity
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.Manifest
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -37,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     companion object {
+        private const val TAG = "MainActivity"
         private const val PERMISSION_REQUEST_CODE = 1001
     }
 
@@ -115,14 +114,14 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndRequestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.MEDIA_CONTENT_CONTROL) 
             != PERMISSION_GRANTED) {
-            println("🔐 申请MEDIA_CONTENT_CONTROL权限...")
+            Log.d(TAG, "申请MEDIA_CONTENT_CONTROL权限...")
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.MEDIA_CONTENT_CONTROL),
                 PERMISSION_REQUEST_CODE
             )
         } else {
-            println("✅ 权限已授予，初始化MediaSession...")
+            Log.d(TAG, "权限已授予，初始化MediaSession...")
             mediaSessionHelper.initialize()
         }
     }
@@ -136,17 +135,17 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
-                    println("✅ 权限已授予，初始化MediaSession...")
+                    Log.d(TAG, "权限已授予，初始化MediaSession...")
                     Toast.makeText(this, "权限已授予，正在尝试连接...", Toast.LENGTH_SHORT).show()
                     mediaSessionHelper.initialize()
                 } else {
-                    println("❌ 权限被拒绝，尝试直接连接...")
+                    Log.e(TAG, "权限被拒绝，尝试直接连接...")
                     Toast.makeText(this, "权限被拒绝，尝试直接连接...", Toast.LENGTH_SHORT).show()
                     // 即使权限被拒绝，也尝试直接连接（某些情况下可能仍然有效）
                     try {
                         mediaSessionHelper.initialize()
                     } catch (e: SecurityException) {
-                        println("❌ 直接连接也失败: ${e.message}")
+                        Log.e(TAG, "直接连接也失败: ${e.message}")
                         Toast.makeText(this, "需要媒体控制权限，请在设置中手动授予", Toast.LENGTH_LONG).show()
                     }
                 }
