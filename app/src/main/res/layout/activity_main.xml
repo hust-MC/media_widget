@@ -11,7 +11,7 @@
         android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="车机桌面 - MediaSession演示"
+        android:text="@string/main_title"
         android:textColor="@android:color/white"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -36,7 +36,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="桌面控制面板"
+            android:text="@string/main_desktop_panel"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:layout_marginBottom="16dp" />
@@ -44,7 +44,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="实况桌面 • 地图桌面 • 壁纸桌面"
+            android:text="@string/main_desktop_features_1"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
@@ -52,7 +52,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="天气显示 • 氛围灯 • 空调调节"
+            android:text="@string/main_desktop_features_2"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
 
@@ -96,7 +96,7 @@
                 android:id="@+id/song_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="若梦"
+                android:text="@string/main_default_song_title"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -108,7 +108,7 @@
                 android:id="@+id/song_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="周深"
+                android:text="@string/main_default_song_artist"
                 android:textColor="#CCCCCC"
                 android:textSize="12sp"
                 android:layout_marginTop="1dp"
@@ -126,7 +126,7 @@
             android:background="@drawable/play_button_background"
             android:layout_gravity="center_vertical"
             android:scaleType="centerInside"
-            android:contentDescription="播放"
+            android:contentDescription="@string/main_play_content_description"
             android:padding="12dp" />
 
     </LinearLayout>
@@ -136,7 +136,7 @@
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MediaSession Demo - 车机音乐播放器"
+        android:text="@string/main_status_default"
         android:textColor="#888888"
         android:textSize="12sp"
         android:layout_marginBottom="16dp"

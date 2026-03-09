@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Desktop Media Controller"
+        android:text="@string/desktop_title"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
@@ -22,7 +22,7 @@
         android:id="@+id/connect_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect to MediaSession"
+        android:text="@string/desktop_connect_button"
         android:layout_marginBottom="32dp" />
 
     <!-- Album Art -->
@@ -39,7 +39,7 @@
         android:id="@+id/desktop_song_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No Media"
+        android:text="@string/desktop_no_media"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -50,7 +50,7 @@
         android:id="@+id/desktop_song_artist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Not Connected"
+        android:text="@string/desktop_not_connected"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:layout_marginBottom="32dp" />
@@ -95,7 +95,7 @@
         android:id="@+id/desktop_status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MediaSession Demo - Desktop Controller"
+        android:text="@string/desktop_status_default"
         android:textColor="@android:color/darker_gray"
         android:textSize="12sp" />
 

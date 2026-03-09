@@ -1,4 +1,45 @@
 <resources>
     <string name="app_name">Car Launcher Simulator</string>
-</resources>
 
+    <!-- Main Activity / 车机桌面 -->
+    <string name="main_title">车机桌面 - MediaSession演示</string>
+    <string name="main_desktop_panel">桌面控制面板</string>
+    <string name="main_desktop_features_1">实况桌面 • 地图桌面 • 壁纸桌面</string>
+    <string name="main_desktop_features_2">天气显示 • 氛围灯 • 空调调节</string>
+    <string name="main_default_song_title">若梦</string>
+    <string name="main_default_song_artist">周深</string>
+    <string name="main_play_content_description">播放</string>
+    <string name="main_status_default">MediaSession Demo - 车机音乐播放器</string>
+    <string name="main_status_playing">正在播放 - MediaSession</string>
+    <string name="main_status_paused">已暂停</string>
+
+    <!-- Main Activity Toasts -->
+    <string name="toast_permission_granted_connecting">权限已授予，正在尝试连接…</string>
+    <string name="toast_permission_denied_try">权限被拒绝，尝试直接连接…</string>
+    <string name="toast_need_media_permission">需要媒体控制权限，请在设置中手动授予</string>
+    <string name="toast_launch_music">启动音乐播放器</string>
+    <string name="toast_music_app_not_found">未找到音乐播放器App</string>
+    <string name="toast_launch_failed">启动失败: %1$s</string>
+
+    <!-- Desktop Controller Activity -->
+    <string name="desktop_title">Desktop Media Controller</string>
+    <string name="desktop_connect_button">Connect to MediaSession</string>
+    <string name="desktop_no_media">No Media</string>
+    <string name="desktop_not_connected">Not Connected</string>
+    <string name="desktop_status_default">MediaSession Demo - Desktop Controller</string>
+    <string name="desktop_status_init_failed">初始化失败: %1$s</string>
+    <string name="desktop_status_disconnected">Disconnected from MediaSession</string>
+    <string name="desktop_status_manager_not_init">MediaSessionManager 未初始化</string>
+    <string name="desktop_status_connected">Connected to MediaSession</string>
+    <string name="desktop_status_no_active_session">No active MediaSession found</string>
+    <string name="desktop_status_permission_denied">Permission denied: %1$s</string>
+    <string name="desktop_status_connect_failed">连接失败: %1$s</string>
+    <string name="desktop_default_title">Unknown Title</string>
+    <string name="desktop_default_artist">Unknown Artist</string>
+
+    <!-- MediaSessionHelper 默认歌曲/艺术家（展示用） -->
+    <string name="media_unknown_song">未知歌曲</string>
+    <string name="media_unknown_artist">未知艺术家</string>
+    <string name="media_no_song">无歌曲</string>
+    <string name="media_no_artist">无艺术家</string>
+</resources>

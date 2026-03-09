@@ -7,6 +7,7 @@ import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -15,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class DesktopControllerActivity : AppCompatActivity() {
 
-    private lateinit var mediaSessionManager: MediaSessionManager
+    private var mediaSessionManager: MediaSessionManager? = null
     private var mediaController: MediaController? = null
     private var mediaControllerCallback: MediaControllerCallback? = null
 
@@ -33,13 +34,13 @@ class DesktopControllerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_desktop_controller)
 
-        // Initialize UI
         initializeViews()
-
-        // Initialize MediaSession Manager
-        mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-
-        // Set up connect button
+        try {
+            mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+        } catch (e: Exception) {
+            Log.e(TAG, "获取 MediaSessionManager 失败", e)
+            statusText.text = getString(R.string.desktop_status_init_failed, e.message.orEmpty())
+        }
         connectButton.setOnClickListener { connectToMediaSession() }
 
         // Set up control buttons (initially disabled)
@@ -58,7 +59,7 @@ class DesktopControllerActivity : AppCompatActivity() {
 
         // Set initial state
         setControlButtonsEnabled(false)
-        statusText.text = "Disconnected from MediaSession"
+        statusText.text = getString(R.string.desktop_status_disconnected)
     }
 
     private fun setupControlButtons() {
@@ -82,33 +83,30 @@ class DesktopControllerActivity : AppCompatActivity() {
     }
 
     private fun connectToMediaSession() {
+        val manager = mediaSessionManager ?: run {
+            statusText.text = getString(R.string.desktop_status_manager_not_init)
+            return
+        }
         try {
-            // 获取活跃的媒体会话
-            val activeSessions = mediaSessionManager.getActiveSessions(
+            val activeSessions = manager.getActiveSessions(
                 ComponentName(this, DesktopControllerActivity::class.java)
             )
-
             if (activeSessions.isNotEmpty()) {
-                // 连接到第一个活跃的媒体会话
                 val sessionController = activeSessions[0]
-                val sessionToken = sessionController.sessionToken
-                mediaController = MediaController(this, sessionToken)
-
-                // 设置回调以监听媒体信息变化
+                mediaController = MediaController(this, sessionController.sessionToken)
                 setupMediaControllerCallback()
-
-                // 启用控制按钮
                 setControlButtonsEnabled(true)
-                statusText.text = "Connected to MediaSession"
-
-                // 更新UI显示当前媒体信息
+                statusText.text = getString(R.string.desktop_status_connected)
                 updateMediaInfo()
-
             } else {
-                statusText.text = "No active MediaSession found"
+                statusText.text = getString(R.string.desktop_status_no_active_session)
             }
         } catch (e: SecurityException) {
-            statusText.text = "Permission denied: ${e.message}"
+            Log.e(TAG, "权限被拒绝", e)
+            statusText.text = getString(R.string.desktop_status_permission_denied, e.message.orEmpty())
+        } catch (e: Exception) {
+            Log.e(TAG, "连接 MediaSession 失败", e)
+            statusText.text = getString(R.string.desktop_status_connect_failed, e.message.orEmpty())
         }
     }
 
@@ -123,8 +121,8 @@ class DesktopControllerActivity : AppCompatActivity() {
             // 获取媒体元数据
             val metadata = controller.metadata
             if (metadata != null) {
-                songTitle.text = metadata.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "Unknown Title"
-                songArtist.text = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: "Unknown Artist"
+                songTitle.text = metadata.getString(MediaMetadata.METADATA_KEY_TITLE) ?: getString(R.string.desktop_default_title)
+                songArtist.text = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: getString(R.string.desktop_default_artist)
             }
 
             // 更新播放状态
@@ -168,4 +166,9 @@ class DesktopControllerActivity : AppCompatActivity() {
         mediaControllerCallback?.let { mediaController?.unregisterCallback(it) }
         mediaController = null
     }
+
+    companion object {
+        private const val TAG = "DesktopControllerActivity"
+    }
+
 }

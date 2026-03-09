@@ -26,10 +26,14 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val checkConnectionRunnable = object : Runnable {
         override fun run() {
-            if (!mediaSessionHelper.isConnected()) {
-                mediaSessionHelper.tryReconnect()
+            try {
+                if (!mediaSessionHelper.isConnected()) {
+                    mediaSessionHelper.tryReconnect()
+                }
+                updateUI()
+            } catch (e: Exception) {
+                Log.e(TAG, "定期检查连接/更新UI异常: ${e.message}", e)
             }
-            updateUI()
             handler.postDelayed(this, 2000) // 每2秒检查一次
         }
     }
@@ -93,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         playPauseButton.setColorFilter(android.graphics.Color.WHITE)
 
         // Update status
-        statusText.text = if (mediaSessionHelper.isPlaying()) "正在播放 - MediaSession" else "已暂停"
+        statusText.text = if (mediaSessionHelper.isPlaying()) getString(R.string.main_status_playing) else getString(R.string.main_status_paused)
     }
     
     private fun updateAlbumArt() {
@@ -136,17 +140,17 @@ class MainActivity : AppCompatActivity() {
             PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) {
                     Log.d(TAG, "权限已授予，初始化MediaSession...")
-                    Toast.makeText(this, "权限已授予，正在尝试连接...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_permission_granted_connecting), Toast.LENGTH_SHORT).show()
                     mediaSessionHelper.initialize()
                 } else {
                     Log.e(TAG, "权限被拒绝，尝试直接连接...")
-                    Toast.makeText(this, "权限被拒绝，尝试直接连接...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_permission_denied_try), Toast.LENGTH_SHORT).show()
                     // 即使权限被拒绝，也尝试直接连接（某些情况下可能仍然有效）
                     try {
                         mediaSessionHelper.initialize()
                     } catch (e: SecurityException) {
                         Log.e(TAG, "直接连接也失败: ${e.message}")
-                        Toast.makeText(this, "需要媒体控制权限，请在设置中手动授予", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.toast_need_media_permission), Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -158,12 +162,14 @@ class MainActivity : AppCompatActivity() {
             val intent = packageManager.getLaunchIntentForPackage("com.max.media_center")
             if (intent != null) {
                 startActivity(intent)
-                Toast.makeText(this, "启动音乐播放器", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_launch_music), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "未找到音乐播放器App", Toast.LENGTH_SHORT).show()
+                Log.w(TAG, "未找到音乐播放器 com.max.media_center")
+                Toast.makeText(this, getString(R.string.toast_music_app_not_found), Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "启动失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "启动音乐App失败", e)
+            Toast.makeText(this, getString(R.string.toast_launch_failed, e.message.orEmpty()), Toast.LENGTH_SHORT).show()
         }
     }
 

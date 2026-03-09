@@ -8,6 +8,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import com.max.carlaunchersimulator.R
 
 class MediaSessionHelper(private val context: Context) {
 
@@ -34,8 +35,7 @@ class MediaSessionHelper(private val context: Context) {
             // 尝试连接到音乐播放App的MediaSession
             connectToMusicApp()
         } catch (e: Exception) {
-            Log.e(TAG, "MediaSessionManager初始化失败: ${e.message}")
-            e.printStackTrace()
+            Log.e(TAG, "MediaSessionManager初始化失败: ${e.message}", e)
         }
     }
 
@@ -90,8 +90,8 @@ class MediaSessionHelper(private val context: Context) {
         mediaController?.let { controller ->
             val metadata = controller.metadata
             if (metadata != null) {
-                val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "未知歌曲"
-                val artist = metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "未知艺术家"
+                val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: context.getString(R.string.media_unknown_song)
+                val artist = metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: context.getString(R.string.media_unknown_artist)
                 val albumArt = metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
                 currentSong = Song(title, artist, "", albumArt)
             }
@@ -130,7 +130,12 @@ class MediaSessionHelper(private val context: Context) {
         mediaController?.transportControls?.stop()
     }
 
-    fun getCurrentSong(): Song = currentSong ?: Song("无歌曲", "无艺术家", "", null)
+    fun getCurrentSong(): Song = currentSong ?: Song(
+        context.getString(R.string.media_no_song),
+        context.getString(R.string.media_no_artist),
+        "",
+        null
+    )
     
     fun getAlbumArt(): android.graphics.Bitmap? = currentSong?.albumArt
 
