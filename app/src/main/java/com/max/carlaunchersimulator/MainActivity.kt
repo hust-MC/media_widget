@@ -18,8 +18,10 @@ import androidx.core.content.ContextCompat
  * 车机桌面主界面。
  * 模拟车机桌面布局，展示音乐播放器控件，通过 MediaSession 连接音乐 App 并控制播放。
  * 负责申请 MEDIA_CONTENT_CONTROL 权限、定期检查连接状态、刷新歌曲信息与播放/暂停操作。
+ *
+ * 实现 [MediaSessionHelper.ConnectionListener] 以接收连接状态回调，在 UI 上及时反馈给用户。
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener {
 
     /** 专辑封面 ImageView */
     private lateinit var albumArt: ImageView
@@ -74,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.status_text)
 
         mediaSessionHelper = MediaSessionHelper(this)
+        mediaSessionHelper.setConnectionListener(this)
 
         // 无权限则弹窗申请，有权限则直接初始化并连接
         checkAndRequestPermissions()
@@ -133,6 +136,29 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateUI()
+    }
+
+    // -------- ConnectionListener 回调 --------
+
+    override fun onConnected() {
+        runOnUiThread {
+            statusText.text = getString(R.string.main_status_connected)
+            updateUI()
+        }
+    }
+
+    override fun onConnectionFailed(message: String) {
+        runOnUiThread {
+            statusText.text = getString(R.string.main_status_disconnected)
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onDisconnected() {
+        runOnUiThread {
+            statusText.text = getString(R.string.main_status_connection_lost)
+            Toast.makeText(this, getString(R.string.toast_connection_lost), Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
@@ -207,11 +233,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 销毁时取消定时任务并释放 MediaSession 连接与回调。
+     * 销毁时取消定时任务、清除监听器并释放 MediaSession 连接与回调。
      */
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(checkConnectionRunnable)
+        mediaSessionHelper.setConnectionListener(null)
         mediaSessionHelper.release()
     }
 }

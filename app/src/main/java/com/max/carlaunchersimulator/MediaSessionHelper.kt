@@ -17,6 +17,31 @@ import com.max.carlaunchersimulator.R
  */
 class MediaSessionHelper(private val context: Context) {
 
+    /**
+     * 连接状态监听接口。
+     * 供 Activity 等外部组件感知 MediaBrowser 的连接/断开/失败事件，
+     * 以便在 UI 上给用户相应的反馈。
+     */
+    interface ConnectionListener {
+        /** MediaBrowser 连接成功且 MediaController 已就绪 */
+        fun onConnected()
+        /** MediaBrowser 连接失败，[message] 为面向用户的提示文案 */
+        fun onConnectionFailed(message: String)
+        /** MediaBrowser 连接中断（服务端崩溃或主动断开等） */
+        fun onDisconnected()
+    }
+
+    /** 外部设置的连接状态监听器，在 release() 时自动清空 */
+    private var connectionListener: ConnectionListener? = null
+
+    /**
+     * 设置连接状态监听器。
+     * 建议在 Activity.onDestroy 时传入 null 以防止内存泄漏。
+     */
+    fun setConnectionListener(listener: ConnectionListener?) {
+        this.connectionListener = listener
+    }
+
     /** 系统 MediaSession 管理服务，用于获取/连接会话 */
     private var mediaSessionManager: MediaSessionManager? = null
     /** 连接成功后的媒体控制器，用于发送播放控制与获取元数据 */
@@ -82,15 +107,19 @@ class MediaSessionHelper(private val context: Context) {
                 setupMediaControllerCallback()
                 updateCurrentSong()
                 Log.d(TAG, "MediaController设置成功！")
+                connectionListener?.onConnected()
             }
         }
 
         override fun onConnectionFailed() {
             Log.e(TAG, "MediaBrowser连接失败")
+            connectionListener?.onConnectionFailed("连接音乐服务失败，请确保音乐App已启动")
         }
 
         override fun onConnectionSuspended() {
-            Log.d(TAG, "MediaBrowser连接暂停")
+            Log.w(TAG, "MediaBrowser连接中断")
+            mediaController = null
+            connectionListener?.onDisconnected()
         }
     }
 
@@ -193,14 +222,24 @@ class MediaSessionHelper(private val context: Context) {
     }
 
     /**
-     * 释放资源：注销回调、断开 MediaBrowser、清空引用。应在 Activity onDestroy 等时机调用。
+     * 释放资源：安全注销回调、断开 MediaBrowser、清空所有引用。
+     * 应在 Activity.onDestroy 等时机调用。
      */
     fun release() {
-        mediaControllerCallback?.let { mediaController?.unregisterCallback(it) }
+        mediaControllerCallback?.let { callback ->
+            mediaController?.unregisterCallback(callback)
+        }
         mediaController = null
         mediaControllerCallback = null
-        mediaBrowser?.disconnect()
+
+        try {
+            mediaBrowser?.disconnect()
+        } catch (e: Exception) {
+            Log.e(TAG, "断开连接时出错", e)
+        }
         mediaBrowser = null
+
+        connectionListener = null
     }
 
     companion object {

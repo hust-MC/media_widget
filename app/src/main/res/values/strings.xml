@@ -12,6 +12,9 @@
     <string name="main_status_default">MediaSession Demo - 车机音乐播放器</string>
     <string name="main_status_playing">正在播放 - MediaSession</string>
     <string name="main_status_paused">已暂停</string>
+    <string name="main_status_connected">已连接</string>
+    <string name="main_status_disconnected">未连接</string>
+    <string name="main_status_connection_lost">连接已断开</string>
 
     <!-- Main Activity Toasts -->
     <string name="toast_permission_granted_connecting">权限已授予，正在尝试连接…</string>
@@ -20,6 +23,7 @@
     <string name="toast_launch_music">启动音乐播放器</string>
     <string name="toast_music_app_not_found">未找到音乐播放器App</string>
     <string name="toast_launch_failed">启动失败: %1$s</string>
+    <string name="toast_connection_lost">与音乐服务的连接已断开</string>
 
     <!-- Desktop Controller Activity -->
     <string name="desktop_title">Desktop Media Controller</string>
