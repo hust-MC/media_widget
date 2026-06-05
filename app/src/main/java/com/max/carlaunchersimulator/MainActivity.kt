@@ -21,7 +21,8 @@ import androidx.core.content.ContextCompat
  *
  * 实现 [MediaSessionHelper.ConnectionListener] 以接收连接状态回调，在 UI 上及时反馈给用户。
  */
-class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener {
+class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener,
+                      MediaSessionHelper.UiUpdateListener {
 
     /** 专辑封面 ImageView */
     private lateinit var albumArt: ImageView
@@ -45,11 +46,10 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener 
                 if (!mediaSessionHelper.isConnected()) {
                     mediaSessionHelper.tryReconnect()
                 }
-                updateUI()
             } catch (e: Exception) {
-                Log.e(TAG, "定期检查连接/更新UI异常: ${e.message}", e)
+                Log.e(TAG, "定期检查连接异常: ${e.message}", e)
             }
-            handler.postDelayed(this, 2000) // 每 2 秒再次调度
+            handler.postDelayed(this, 2000)
         }
     }
 
@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener 
 
         mediaSessionHelper = MediaSessionHelper(this)
         mediaSessionHelper.setConnectionListener(this)
+        mediaSessionHelper.setUiUpdateListener(this)
 
         // 无权限则弹窗申请，有权限则直接初始化并连接
         checkAndRequestPermissions()
@@ -106,6 +107,8 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener 
         val currentSong = mediaSessionHelper.getCurrentSong()
         songTitle.text = currentSong.title
         songArtist.text = currentSong.artist
+
+        Log.d(TAG, "update UI: title: ${currentSong.title}; artist: ${currentSong.artist}")
 
         updateAlbumArt()
 
@@ -159,6 +162,12 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener 
             statusText.text = getString(R.string.main_status_connection_lost)
             Toast.makeText(this, getString(R.string.toast_connection_lost), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // -------- UiUpdateListener 回调 --------
+
+    override fun onUiNeedsUpdate() {
+        runOnUiThread { updateUI() }
     }
 
     /**
@@ -239,6 +248,7 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener 
         super.onDestroy()
         handler.removeCallbacks(checkConnectionRunnable)
         mediaSessionHelper.setConnectionListener(null)
+        mediaSessionHelper.setUiUpdateListener(null)
         mediaSessionHelper.release()
     }
 }

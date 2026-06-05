@@ -31,8 +31,20 @@ class MediaSessionHelper(private val context: Context) {
         fun onDisconnected()
     }
 
+    /**
+     * UI 更新监听接口。
+     * 当 MediaSession 元数据或播放状态发生变化时，通知外部刷新 UI。
+     * 这样外部不需要轮询，仅在真正变化时才更新界面。
+     */
+    interface UiUpdateListener {
+        fun onUiNeedsUpdate()
+    }
+
     /** 外部设置的连接状态监听器，在 release() 时自动清空 */
     private var connectionListener: ConnectionListener? = null
+
+    /** 外部设置的 UI 更新监听器，MediaSession 事件变化时触发 */
+    private var uiUpdateListener: UiUpdateListener? = null
 
     /**
      * 设置连接状态监听器。
@@ -40,6 +52,15 @@ class MediaSessionHelper(private val context: Context) {
      */
     fun setConnectionListener(listener: ConnectionListener?) {
         this.connectionListener = listener
+    }
+
+    /**
+     * 设置 UI 更新监听器。
+     * 当元数据或播放状态变化时，listener 的 onUiNeedsUpdate() 会被调用。
+     * 建议在 Activity.onDestroy 时传入 null 以防止内存泄漏。
+     */
+    fun setUiUpdateListener(listener: UiUpdateListener?) {
+        this.uiUpdateListener = listener
     }
 
     /** 系统 MediaSession 管理服务，用于获取/连接会话 */
@@ -52,6 +73,9 @@ class MediaSessionHelper(private val context: Context) {
     private var mediaBrowser: MediaBrowserCompat? = null
     /** 当前是否处于播放中（根据 PlaybackState 维护） */
     private var isPlaying = false
+
+    /** 上一次通知 UI 的播放状态，用于避免无意义的重复通知 */
+    private var lastNotifiedIsPlaying: Boolean? = null
     /** 当前歌曲信息（标题、艺术家、专辑图等），由元数据回调更新 */
     private var currentSong: Song? = null
 
@@ -107,6 +131,7 @@ class MediaSessionHelper(private val context: Context) {
                 setupMediaControllerCallback()
                 updateCurrentSong()
                 Log.d(TAG, "MediaController设置成功！")
+                lastNotifiedIsPlaying = null  // 重置，避免状态错位
                 connectionListener?.onConnected()
             }
         }
@@ -148,16 +173,23 @@ class MediaSessionHelper(private val context: Context) {
     }
 
     /**
-     * MediaController 回调：元数据或播放状态变化时更新内部状态（当前歌曲、是否播放中）。
+     * MediaController 回调：元数据或播放状态变化时更新内部状态（当前歌曲、是否播放中），
+     * 并通知外部 UI 需要刷新。
      */
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             updateCurrentSong()
+            uiUpdateListener?.onUiNeedsUpdate()
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            state?.let {
-                isPlaying = it.state == PlaybackStateCompat.STATE_PLAYING
+            val newIsPlaying = state?.let {
+                it.state == PlaybackStateCompat.STATE_PLAYING
+            } ?: false
+            isPlaying = newIsPlaying
+            if (newIsPlaying != lastNotifiedIsPlaying) {
+                lastNotifiedIsPlaying = newIsPlaying
+                uiUpdateListener?.onUiNeedsUpdate()
             }
         }
     }
@@ -240,6 +272,7 @@ class MediaSessionHelper(private val context: Context) {
         mediaBrowser = null
 
         connectionListener = null
+        uiUpdateListener = null
     }
 
     companion object {
