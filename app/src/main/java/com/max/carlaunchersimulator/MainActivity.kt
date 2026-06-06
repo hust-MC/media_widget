@@ -2,8 +2,6 @@ package com.max.carlaunchersimulator
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,9 +15,10 @@ import androidx.core.content.ContextCompat
 /**
  * 车机桌面主界面。
  * 模拟车机桌面布局，展示音乐播放器控件，通过 MediaSession 连接音乐 App 并控制播放。
- * 负责申请 MEDIA_CONTENT_CONTROL 权限、定期检查连接状态、刷新歌曲信息与播放/暂停操作。
+ * 负责申请 MEDIA_CONTENT_CONTROL 权限、响应 MediaSession 事件刷新 UI。
  *
  * 实现 [MediaSessionHelper.ConnectionListener] 以接收连接状态回调，在 UI 上及时反馈给用户。
+ * 实现 [MediaSessionHelper.UiUpdateListener] 以在元数据/播放状态变化时刷新 UI。
  */
 class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener,
                       MediaSessionHelper.UiUpdateListener {
@@ -37,21 +36,6 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener,
 
     /** MediaSession 封装，用于连接音乐 App 并控制播放 */
     private lateinit var mediaSessionHelper: MediaSessionHelper
-    /** 主线程 Handler，用于定时任务 */
-    private val handler = Handler(Looper.getMainLooper())
-    /** 定时任务：检查连接并刷新 UI，每 2 秒执行一次 */
-    private val checkConnectionRunnable = object : Runnable {
-        override fun run() {
-            try {
-                if (!mediaSessionHelper.isConnected()) {
-                    mediaSessionHelper.tryReconnect()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "定期检查连接异常: ${e.message}", e)
-            }
-            handler.postDelayed(this, 2000)
-        }
-    }
 
     companion object {
         private const val TAG = "MainActivity"
@@ -83,8 +67,6 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener,
         checkAndRequestPermissions()
 
         updateUI()
-        // 启动定时检查连接与 UI 刷新
-        handler.post(checkConnectionRunnable)
 
         // 播放按钮：已连接则播放/暂停，未连接则尝试启动音乐 App
         playPauseButton.setOnClickListener {
@@ -242,11 +224,10 @@ class MainActivity : AppCompatActivity(), MediaSessionHelper.ConnectionListener,
     }
 
     /**
-     * 销毁时取消定时任务、清除监听器并释放 MediaSession 连接与回调。
+     * 销毁时清除监听器并释放 MediaSession 连接与回调。
      */
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(checkConnectionRunnable)
         mediaSessionHelper.setConnectionListener(null)
         mediaSessionHelper.setUiUpdateListener(null)
         mediaSessionHelper.release()

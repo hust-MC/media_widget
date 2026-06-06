@@ -3,6 +3,8 @@ package com.max.carlaunchersimulator
 import android.content.ComponentName
 import android.content.Context
 import android.media.session.MediaSessionManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -65,6 +67,8 @@ class MediaSessionHelper(private val context: Context) {
 
     /** 系统 MediaSession 管理服务，用于获取/连接会话 */
     private var mediaSessionManager: MediaSessionManager? = null
+    /** 主线程 Handler，用于调度重连定时任务 */
+    private val handler = Handler(Looper.getMainLooper())
     /** 连接成功后的媒体控制器，用于发送播放控制与获取元数据 */
     private var mediaController: MediaControllerCompat? = null
     /** 注册在 mediaController 上的回调，用于接收元数据与播放状态变化 */
@@ -76,6 +80,13 @@ class MediaSessionHelper(private val context: Context) {
 
     /** 上一次通知 UI 的播放状态，用于避免无意义的重复通知 */
     private var lastNotifiedIsPlaying: Boolean? = null
+
+    /** 指数退避重连相关字段 */
+    private var reconnectRunnable: Runnable? = null
+    private var currentReconnectDelayMs = 2_000L
+    private val maxReconnectDelayMs = 60_000L
+    private val backoffMultiplier = 2.0
+
     /** 当前歌曲信息（标题、艺术家、专辑图等），由元数据回调更新 */
     private var currentSong: Song? = null
 
@@ -125,13 +136,14 @@ class MediaSessionHelper(private val context: Context) {
     private val connectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             Log.d(TAG, "MediaBrowser连接成功！")
+            resetReconnectState()
             val sessionToken = mediaBrowser?.sessionToken
             if (sessionToken != null) {
                 mediaController = MediaControllerCompat(context, sessionToken)
                 setupMediaControllerCallback()
                 updateCurrentSong()
                 Log.d(TAG, "MediaController设置成功！")
-                lastNotifiedIsPlaying = null  // 重置，避免状态错位
+                lastNotifiedIsPlaying = null
                 connectionListener?.onConnected()
             }
         }
@@ -139,12 +151,14 @@ class MediaSessionHelper(private val context: Context) {
         override fun onConnectionFailed() {
             Log.e(TAG, "MediaBrowser连接失败")
             connectionListener?.onConnectionFailed("连接音乐服务失败，请确保音乐App已启动")
+            startReconnectWithBackoff()
         }
 
         override fun onConnectionSuspended() {
             Log.w(TAG, "MediaBrowser连接中断")
             mediaController = null
             connectionListener?.onDisconnected()
+            startReconnectWithBackoff()
         }
     }
 
@@ -245,6 +259,35 @@ class MediaSessionHelper(private val context: Context) {
     fun isConnected(): Boolean = mediaController != null
 
     /**
+     * 启动带指数退避的重连流程：首次 2s，后续每次翻倍，上限 60s。
+     * 成功后 [resetReconnectState] 会停止。
+     */
+    private fun startReconnectWithBackoff() {
+        reconnectRunnable?.let { handler.removeCallbacks(it) }
+
+        reconnectRunnable = Runnable {
+            if (mediaController == null) {
+                Log.d(TAG, "退避重连: delay=${currentReconnectDelayMs}ms")
+                connectToMusicApp()
+                currentReconnectDelayMs = (currentReconnectDelayMs * backoffMultiplier).toLong()
+                    .coerceAtMost(maxReconnectDelayMs)
+                reconnectRunnable?.let { handler.postDelayed(it, currentReconnectDelayMs) }
+            }
+        }
+        handler.postDelayed(reconnectRunnable!!, currentReconnectDelayMs)
+    }
+
+    /**
+     * 停止退避重连并重置延迟为初始值。
+     * 在连接成功时调用。
+     */
+    private fun resetReconnectState() {
+        reconnectRunnable?.let { handler.removeCallbacks(it) }
+        reconnectRunnable = null
+        currentReconnectDelayMs = 2_000L
+    }
+
+    /**
      * 若未连接则再次尝试连接（用于定时重连）。
      */
     fun tryReconnect() {
@@ -273,6 +316,7 @@ class MediaSessionHelper(private val context: Context) {
 
         connectionListener = null
         uiUpdateListener = null
+        resetReconnectState()
     }
 
     companion object {
