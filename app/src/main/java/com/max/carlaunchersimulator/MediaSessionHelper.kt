@@ -210,7 +210,13 @@ class MediaSessionHelper(private val context: Context) {
 
     /** 发送播放 */
     fun play() {
-        mediaController?.transportControls?.play()
+        if (mediaController == null) {
+            resetReconnectState()
+            currentReconnectDelayMs = 0L
+            startReconnectWithBackoff()
+        } else {
+            mediaController?.transportControls?.play()
+        }
     }
 
     /** 发送暂停 */
